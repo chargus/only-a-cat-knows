@@ -17,7 +17,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-np.random.seed(0)
+# np.random.seed(0)
 plt.rcParams['toolbar'] = 'None'
 
 # Define simulation parmeters and initialize dynamics:
@@ -28,9 +28,9 @@ ncat = len(names)
 rho = 4.
 L = np.sqrt(n / rho)
 eta = 1.2
-cat_eta = 1.4
+cat_eta = 1.1
 vel = 0.05
-cat_vel = 0.02
+cat_vel = 0.005
 cat_pull = -1.
 rcscale = .05
 nframes = 4000
@@ -47,7 +47,7 @@ inbg3 = False
 
 def data_gen():
     while True:
-        if time.time() - starttime > 40:
+        if time.time() - starttime > 180:
             cat_pos[:] = .5
             pos[:] = .5
         elif time.time() - starttime > 10:
@@ -117,7 +117,7 @@ def update(data):
 
     # Update cats:
     for i in range(len(abbox)):
-        abbox[i].xybox = cat_pos[i] * scalefactor * 1.3  # not all cats visible
+        abbox[i].xybox = cat_pos[i] * scalefactor * 1.4  # not all cats visible
         if np.sin(cat_thetas[i]) > 0:
             abbox[i].offsetbox = ibf[i]  # Face forwards
         else:
@@ -143,18 +143,18 @@ def update(data):
     # Update background
     # if (not inbg2) and (time.time() - starttime > 10):
 
-    if time.time() - starttime > 20:
+    if time.time() - starttime > 60:
         im.set_data(bg2)
 
     # if (not inbg3) and (time.time() - starttime > 20):
-    if time.time() - starttime > 30:
+    if time.time() - starttime > 120:
         im.set_data(bg3)
 
-    if time.time() - starttime > 40:
+    if time.time() - starttime > 180:
         im.set_data(bg4)
         im.set_zorder(101)
 
-    if time.time() - starttime > 50:
+    if time.time() - starttime > 190:
         exit()
     return abbox,
 
@@ -164,7 +164,7 @@ def data_gen_random():
         yield np.random.uniform(0, 1, 2)
 
 
-ani = animation.FuncAnimation(fig, update, data_gen, blit=False, interval=25)
+ani = animation.FuncAnimation(fig, update, data_gen, blit=False, interval=50)
 figManager = plt.get_current_fig_manager()
 figManager.window.showMaximized()
 # plt.box(False)

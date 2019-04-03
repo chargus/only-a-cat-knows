@@ -5,7 +5,7 @@ Adapted from projects/03_active/active.py
 
 import numpy as np
 import scipy.spatial
-np.random.seed(0)
+# np.random.seed(0)
 
 
 def initialize(n, rho):
