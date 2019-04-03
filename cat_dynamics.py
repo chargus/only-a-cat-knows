@@ -133,6 +133,79 @@ def timestep(pos, thetas, rcut, eta, vel, L,
     return pos, thetas
 
 
+def get_r2(pos):
+    # Determine particles within cutoff radius
+    dx = np.subtract.outer(pos[:, 0], pos[:, 0])
+    dy = np.subtract.outer(pos[:, 1], pos[:, 1])
+
+    # Apply "minimum image" convention: interact with nearest periodic image
+    # dx = apply_pbc(dx, L)  # x component of i-j vector
+    # dy = apply_pbc(dy, L)  # y component of i-j vector
+
+    r2 = dx**2 + dy**2  # Squared distance between all particle pairs
+    return r2
+
+
+def lj(r2, sigma, epsilon):
+    """Compute the Lennard-Jones force and potential energy.
+
+    Returned force is normalized by r, such that it can be multiplied by the
+    x, y or z component of r to obtain the correct cartesian component of the
+    force.
+
+    Parameters
+    ----------
+    r2 : float or [N] numpy array
+        Squared particle-particle separation.
+    sigma : float
+        Width of the potential, defined by distance at which potential is zero.
+    epsilon : float
+        Depth of the potential well, relative to the energy at infinite
+        separation.
+
+    """
+    r12 = (sigma**2 / r2)**6
+    r6 = (sigma**2 / r2)**3
+    lj_force = (48 / r2) * epsilon * (r12 - .5 * r6)
+    lj_energy = 4 * epsilon * (r12 - r6)
+    return lj_force, lj_energy
+
+# def fbh(r2, k, L):
+#     """Flat-bottomed harmonic potential"""
+#     return k*r2
+
+
+def timestep_underdamped(pos, vel, gamma, T, rcut, L, dt,
+                         sigma=1., epsilon=1.):
+    """Update position and angles of all particles.
+    """
+    # First update the positions:
+    R = np.random.normal(size=(len(pos), 2)) * np.sqrt(2 * T * gamma * dt)
+
+    dx = np.subtract.outer(pos[:, 0], pos[:, 0])
+    dy = np.subtract.outer(pos[:, 1], pos[:, 1])
+    # Apply "minimum image" convention: interact with nearest periodic image
+    # dx = apply_pbc(dx, L)  # x component of i-j vector
+    # dy = apply_pbc(dy, L)  # y component of i-j vector
+    r2 = dx**2 + dy**2  # Squared distance between all particle pairs
+    mask = r2 > 0
+    lj_force, _ = lj(r2[mask], sigma, epsilon)
+    fx = np.zeros_like(dx)
+    fx[mask] = -dx[mask] * lj_force  # Negative sign so dx points from j to i
+    fy = np.zeros_like(dy)
+    fy[mask] = -dy[mask] * lj_force  # Negative sign so dy points from j to i
+    net_fx = np.sum(fx, axis=0)
+    net_fy = np.sum(fy, axis=0)
+    F = np.stack([net_fx, net_fy], axis=1)
+
+    pos[:] = (pos[:] + vel * dt) % L  # Modulo L to handle PBCs
+    vel[:] = (vel[:] - gamma * vel[:] + F + R[:])
+    # vel[:, 0] = (vel[:, 0] - gamma * vel[:, 0] + fx + R[:, 0])
+    # vel[:, 1] = (vel[:, 1] - gamma * vel[:, 1] + fy + R[:, 1])
+    # Now update the angles:
+    return pos, vel
+
+
 def run(n, ncat, rho, eta, cat_eta, vel, cat_vel, cat_pull, rcut=None,
         nframes=100, nlog=10, mod=False, rcscale=None):
     """Run a dynamics simulation.
