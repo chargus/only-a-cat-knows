@@ -131,7 +131,7 @@ def update(data):
     # Update labels:
     for i in range(ncat):
         shift = np.array([0, .1])
-        labels[i].set_position((cat_pos[i] + shift) * scalefactor * 1.3)
+        labels[i].set_position((cat_pos[i] + shift) * scalefactor * 1.4)
 
     # Update fish:
     for i in range(n):
