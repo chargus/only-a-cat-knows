@@ -36,7 +36,6 @@ def update(data):
         shift = np.array([0, .1])
         scaledpos = scalefactor * (1.4 * (cat_pos[i] + shift) - 1.4)
         labels[i].set_position(scaledpos)
-        # labels[i].set_position((cat_pos[i] + shift) * scalefactor * 1.4)
 
     # Update fish:
     for i in range(n):
@@ -87,11 +86,11 @@ if __name__ == '__main__':
     ncat = len(names)       # Number of cats
     L = 2.5                 # Box length
     eta = 1.2               # Fish friction coefficient
-    cat_eta = 1.1           # Cat friction coefficient
+    cat_eta = 1.            # Cat friction coefficient
     vel = 0.1               # Fish velocity (overdamped, so constant)
-    cat_vel = 0.1          # Cat velocity (overdamped, so constant)
+    cat_vel = 0.02          # Cat velocity (overdamped, so constant)
     cat_pull = -1.          # Attraction of fish to cats
-    rcscale = .05           # Scale factor determining rcut
+    rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
     t0 = 1                  # Initial frozen frame to get oriented
@@ -102,7 +101,7 @@ if __name__ == '__main__':
 
     # Initialize:
     pos, thetas, L = cat_dynamics.initialize(n, L**2 / n)
-    cat_pos = np.random.uniform(L * .1, L * .9, size=(ncat, 2))
+    cat_pos = np.random.uniform(0, L, size=(ncat, 2))
     cat_thetas = np.random.uniform(-np.pi, np.pi, size=ncat)
     starttime = time.time()
 
@@ -157,6 +156,6 @@ if __name__ == '__main__':
         fig, update, data_gen, blit=False, interval=50)
     figManager = plt.get_current_fig_manager()
     figManager.window.showMaximized()
-    plt.tight_layout()
+    # plt.tight_layout()
     ax.axis('off')  # Turn off ugly border
     plt.show()
