@@ -42,7 +42,15 @@ def update(data):
         fishbox[i].xybox = pos[i] * scalefactor
         theta360 = (thetas[i] + np.pi) * (180. / np.pi)
         angleid = (int(theta360 + 15) % 360) / 30
-        fishbox[i].offsetbox = fishcolors[fishcolorids[i]][angleid]  # rotate
+        if time.time() - starttime <= t1:  # rotate
+            fishbox[i].offsetbox = fishcolors[fishcolorids[i]][angleid]
+        elif time.time() - starttime <= t2:
+            fishbox[i].offsetbox = imcheese[angleid]
+        else:
+            if i in range(3):
+                fishbox[i].offsetbox = imcomet[angleid]
+            else:
+                fishbox[i].offsetbox = imstar[angleid]
 
     # Update background
     if time.time() - starttime > t1:
@@ -89,13 +97,13 @@ if __name__ == '__main__':
     cat_eta = 1.            # Cat friction coefficient
     vel = 0.1               # Fish velocity (overdamped, so constant)
     cat_vel = 0.02          # Cat velocity (overdamped, so constant)
-    cat_pull = -1.          # Attraction of fish to cats
+    cat_pull = .2         # Attraction of fish to cats
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
     t0 = 1                  # Initial frozen frame to get oriented
-    t1 = 60                 # Ocean
-    t2 = 120                # Field and mac n cheese
+    t1 = 5                  # Ocean
+    t2 = 10                # Field and mac n cheese
     t3 = 180                # Outer space
     t4 = 190                # End
 
@@ -141,6 +149,13 @@ if __name__ == '__main__':
            for a in angles]
     imc = [OffsetImage(img.imread('icons/fish/c{}.png'.format(a)), zoom=1.3)
            for a in angles]
+    imcheese = [OffsetImage(img.imread('icons/cheese/cheese{}.png'.format(a)),
+                            zoom=1.) for a in angles]
+    imstar = [OffsetImage(img.imread('icons/space/star{}.png'.format(a)),
+                          zoom=.8) for a in angles]
+    imcomet = [OffsetImage(img.imread('icons/space/comet{}.png'.format(a)),
+                           zoom=1.) for a in angles]
+
     fishcolors = [ima, imb, imc]
     fishcolorids = np.random.randint(3, size=n)
     fishbox = [AnnotationBbox(ima[0], [0, 0], xycoords='data',
