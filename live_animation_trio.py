@@ -55,6 +55,9 @@ def update(data):
     t_elapsed = currtime
     if currtime < tfade:
         imfade.set_alpha(1. - (t_elapsed / tfade))
+    if currtime > tfadeout:
+        alpha = min(1., (currtime - tfadeout) / tfade)
+        imfade.set_alpha(alpha)
 
     return abbox,
 
@@ -91,7 +94,8 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    tfade = 10
+    tfade = 5
+    tfadeout = 15
 
     # Initialize:
     pos = np.array([[.1, .8],

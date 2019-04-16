@@ -62,6 +62,16 @@ def update(data):
         scaledpos = scalefactor * (1.4 * (cat_pos[i] + shift) - 1.4)
         labels[i].set_position(scaledpos)
 
+    # Update countdown clock
+    show_clock = False
+    for t in [t1, t2, t3, t4]:
+        countdown = t - currtime
+        if (countdown > 0) and (countdown < 7):
+            show_clock = True
+            clock.set_text('{:.2f}'.format(countdown))
+    if not show_clock:
+        clock.set_text('')
+
     # Update fish:
     for i in range(n):
         fishbox[i].xybox = pos[i] * scalefactor
@@ -130,9 +140,9 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    t0 = 1                  # Initial frozen frame to get oriented
-    t1 = 10                 # Ocean
-    t2 = 20                 # Field and mac n cheese
+    t0 = 5                  # Initial frozen frame to get oriented
+    t1 = 60                 # Ocean
+    t2 = 120                # Field and mac n cheese
     t3 = 180                # Outer space
     t4 = 190                # End
 
@@ -172,6 +182,10 @@ if __name__ == '__main__':
                  'fontsize': 24, 'family': 'monospace', 'weight': 'bold',
                  'zorder': 100}
         labels.append(ax.text(0, 0, names[i], props))
+    clock = ax.text(.9, .9, '', props, zorder=100,  # Countdown clock
+                    transform=ax.transAxes,
+                    color='m', fontsize=40, family='heavy',
+                    bbox={'facecolor': 'white', 'pad': 5, 'alpha': .8})
 
     # Add fish:
     angles = range(0, 360, 30)
