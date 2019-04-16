@@ -4,7 +4,6 @@ Adapted from projects/03_active/active.py
 """
 
 import numpy as np
-import scipy.spatial
 # np.random.seed(0)
 
 
@@ -45,11 +44,11 @@ def avg_theta(thetas, cat_vec=None, cat_pull=0.):
     """
     xmean = np.mean(np.sin(thetas))
     ymean = np.mean(np.cos(thetas))
+
     if cat_vec is not None:
-        cat_vec /= np.linalg.norm(cat_vec)
-        cat_vec *= cat_pull
-        xmean = (xmean + cat_vec[0] * cat_pull) / (1. + cat_pull)
-        ymean = (ymean + cat_vec[1] * cat_pull) / (1. + cat_pull)
+        nn = np.argmin(np.sum(cat_vec**2, axis=1), axis=0)
+        xmean = (xmean + cat_pull * cat_vec[nn][0])
+        ymean = (ymean + cat_pull * cat_vec[nn][1])
     return np.arctan2(xmean, ymean)
 
 
@@ -98,14 +97,14 @@ def align(pos, thetas, eta, rcut, L=1.0, mod=False, cat_pos=None, cat_pull=0.):
     """
     mask = get_neighbors(pos, rcut, L)
     thetas_new = np.empty_like(thetas)
-    if cat_pos is not None:
-        nearest_cat = np.argmin(scipy.spatial.distance.cdist(pos, cat_pos),
-                                axis=1)
+    # if cat_pos is not None:
+    #     nearest_cat = np.argmin(scipy.spatial.distance.cdist(pos, cat_pos),
+    #                             axis=1)
     # note: no easy way to vectorize for-loop, since len of thetas_new varies
     for i in range(len(thetas)):
         neighbors_thetas = thetas[mask[i]]
         if cat_pos is not None:
-            cat_vec = cat_pos[nearest_cat[i]] - pos[i]
+            cat_vec = cat_pos - pos[i]
         else:
             cat_vec = None
         avg = avg_theta(neighbors_thetas, cat_vec, cat_pull)
@@ -127,7 +126,6 @@ def timestep(pos, thetas, rcut, eta, vel, L,
     dy = vel * np.sin(thetas)
     pos[:, 0] = (pos[:, 0] + dx) % L  # Modulo L to handle PBCs
     pos[:, 1] = (pos[:, 1] + dy) % L  # Modulo L to handle PBCs
-
     # Now update the angles:
     thetas = align(pos, thetas, eta, rcut, L, mod, cat_pos, cat_pull)
     return pos, thetas
@@ -170,9 +168,29 @@ def lj(r2, sigma, epsilon):
     lj_energy = 4 * epsilon * (r12 - r6)
     return lj_force, lj_energy
 
-# def fbh(r2, k, L):
-#     """Flat-bottomed harmonic potential"""
-#     return k*r2
+
+def rep12(r2, sigma, epsilon):
+    """Compute a purely repulsive potential and corresponding force.
+
+    Returned force is normalized by r, such that it can be multiplied by the
+    x, y or z component of r to obtain the correct cartesian component of the
+    force.
+
+    Parameters
+    ----------
+    r2 : float or [N] numpy array
+        Squared particle-particle separation.
+    sigma : float
+        Width of the potential, defined by distance at which potential is zero.
+    epsilon : float
+        Depth of the potential well, relative to the energy at infinite
+        separation.
+
+    """
+    r12 = (sigma**2 / r2)**6
+    force = (48 / r2) * epsilon * r12
+    energy = 4 * epsilon * r12
+    return force, energy
 
 
 def timestep_underdamped(pos, vel, gamma, T, rcut, L, dt,
@@ -203,6 +221,70 @@ def timestep_underdamped(pos, vel, gamma, T, rcut, L, dt,
     # vel[:, 0] = (vel[:, 0] - gamma * vel[:, 0] + fx + R[:, 0])
     # vel[:, 1] = (vel[:, 1] - gamma * vel[:, 1] + fy + R[:, 1])
     # Now update the angles:
+    return pos, vel
+
+
+def piano_trio_bc(pos, vel, L):
+    lb = 0.17 * L  # Lower bound
+    ub = L  # Upper bound
+    # Left
+    mask = pos[:, 0] < lb
+    pos[:, 0][mask] = lb                 # move in-bounds
+    vel[:, 0][mask] = -vel[:, 0][mask]   # bounce velocity
+
+    # Right
+    mask = pos[:, 0] > ub
+    pos[:, 0][mask] = ub                 # move in-bounds
+    vel[:, 0][mask] = -vel[:, 0][mask]   # bounce velocity
+
+    # Bottom
+    mask = pos[:, 1] < lb
+    pos[:, 1][mask] = lb                 # move in-bounds
+    vel[:, 1][mask] = -vel[:, 1][mask]   # bounce velocity
+
+    # Top
+    mask = pos[:, 1] > ub
+    pos[:, 1][mask] = ub                 # move in-bounds
+    vel[:, 1][mask] = -vel[:, 1][mask]   # bounce velocity
+
+    # Boat
+    # blb = 0.5 * L
+    # bub = 0.6 * L
+    # bleftb = 0.4 * L
+    # brightb = 0.6 * L
+    # mask = (pos[:, 1] > blb) * (pos[:, 1] < bub)
+    # mask *= (pos[:, 0] > bleftb) * (pos[:, 1] < brightb)
+    # mask_down = mask * (vel[:, 1] >= 0)
+    # mask_up = mask * (vel[:, 1] < 0)
+    # pos[:, 1][mask_down] = blb
+    # pos[:, 1][mask_up] = bub
+    # vel[:, 1][mask] = -vel[:, 1][mask]
+
+    return pos, vel
+
+
+def timestep_newton(pos, vel, L, dt, sigma=1., epsilon=1., m=1.):
+    """Update position and angles of all particles.
+    """
+    # First update the positions:
+    x = pos[:, 0]
+    y = pos[:, 1]
+    dx = np.subtract.outer(x, x)
+    dy = np.subtract.outer(y, y)
+    r2 = dx**2 + dy**2  # Squared distance between all particle pairs
+    mask = r2 > 0
+    force, _ = rep12(r2[mask], sigma, epsilon)
+    fx = np.zeros_like(dx)
+    fx[mask] = -dx[mask] * force  # Negative sign so dx points from j to i
+    fy = np.zeros_like(dy)
+    fy[mask] = -dy[mask] * force  # Negative sign so dy points from j to i
+    net_fx = np.sum(fx, axis=0)
+    net_fy = np.sum(fy, axis=0)
+
+    F = np.stack([net_fx, net_fy], axis=1)
+    # pos[:] = (pos[:] + vel * dt) % L      # Modulo L to handle PBCs
+    pos[:] = (pos[:] + vel * dt)
+    vel[:] = (vel[:] + F * dt / m[:, None])
     return pos, vel
 
 
