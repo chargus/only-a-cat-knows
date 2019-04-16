@@ -16,6 +16,8 @@ plt.rcParams['toolbar'] = 'None'
 
 def update(data):
     pos, thetas, cat_pos, cat_thetas = data
+    currtime = time.time() - starttime
+
     buff = 0.5  # Hysteresis buffer, to keep cat icons from jittering
     # Update cats:
     for i in range(len(abbox)):
@@ -65,9 +67,9 @@ def update(data):
         fishbox[i].xybox = pos[i] * scalefactor
         theta360 = (thetas[i] + np.pi) * (180. / np.pi)
         angleid = (int(theta360 + 15) % 360) / 30
-        if time.time() - starttime <= t1:  # rotate
+        if currtime <= t1:  # rotate
             fishbox[i].offsetbox = fishcolors[fishcolorids[i]][angleid]
-        elif time.time() - starttime <= t2:
+        elif currtime <= t2:
             fishbox[i].offsetbox = imcheese[angleid]
         else:
             if i in range(3):
@@ -76,17 +78,21 @@ def update(data):
                 fishbox[i].offsetbox = imstar[angleid]
 
     # Update background
-    if time.time() - starttime > t1:
+    if currtime < t1:
+        bgid[0] = (bgid[0] + 1) % 4
+        im.set_data(bg1[bgid[0]])
+
+    if currtime > t1:
         im.set_data(bg2)
 
-    if time.time() - starttime > t2:
+    if currtime > t2:
         im.set_data(bg3)
 
-    if time.time() - starttime > t3:
+    if currtime > t3:
         im.set_data(bg4)
         im.set_zorder(101)
 
-    if time.time() - starttime > t4:
+    if currtime > t4:
         exit()
     return abbox,
 
@@ -139,11 +145,12 @@ if __name__ == '__main__':
 
     # Initialize matplotlib figure
     fig, ax = plt.subplots(facecolor='black', figsize=(8, 8))
-    bg1 = img.imread('f/bgocean.jpg')
+    bg1 = [img.imread('f/bg_underwater/{}.png'.format(i)) for i in range(4)]
     bg2 = img.imread('f/bg2.png')
     bg3 = img.imread('f/bgspace.jpg')
     bg4 = img.imread('f/endpage.png')
-    im = ax.imshow(bg1, alpha=1.0, zorder=0)
+    bgid = [0]
+    im = ax.imshow(bg1[0], alpha=1.0, zorder=0)
 
     # Add cats:
     imcat = {}

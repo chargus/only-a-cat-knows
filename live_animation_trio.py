@@ -37,12 +37,13 @@ def update(data):
     scaledpos = scalefactor * (.9 * boat_pos[0])
     boatbox.xybox = scaledpos
     nboatframes = 100
-    nboatupdate = 10  # Update every .1 seconds
-    boatid = int((currtime % nboatupdate) * (nboatframes / nboatupdate))
+    # nboatupdate = 10  # Update every .1 seconds
+    # boatid = int((currtime % nboatupdate) * (nboatframes / nboatupdate))
+    boatid[0] = (boatid[0] + 2) % nboatframes
     if boat_vel[0][0] < 0:
-        boatbox.offsetbox = imboatl[boatid]
+        boatbox.offsetbox = imboatl[boatid[0]]
     else:
-        boatbox.offsetbox = imboatr[boatid]
+        boatbox.offsetbox = imboatr[boatid[0]]
 
     # Update labels:
     for i in range(ncat):
@@ -90,7 +91,7 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    tfade = 20
+    tfade = 10
 
     # Initialize:
     pos = np.array([[.1, .8],
@@ -103,6 +104,7 @@ if __name__ == '__main__':
                     [0., 0.]])
     boat_vel = np.array([[-0.01, 0.]])
     starttime = time.time()
+    boatid = [0]
 
     # Initialize matplotlib figure
     fig, ax = plt.subplots(facecolor='black', figsize=(8, 8))
