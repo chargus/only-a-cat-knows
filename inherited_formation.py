@@ -64,7 +64,7 @@ def update(data):
 
     # Update countdown clock
     show_clock = False
-    for t in [t1, t2, t3, t4]:
+    for t in [t0, t1, t2, t3]:
         countdown = t - currtime
         if (countdown > 0) and (countdown < 7):
             show_clock = True
@@ -140,11 +140,11 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    t0 = 5                  # Initial frozen frame to get oriented
-    t1 = 60                 # Ocean
-    t2 = 120                # Field and mac n cheese
-    t3 = 180                # Outer space
-    t4 = 190                # End
+    t0 = 10                 # Initial frozen frame to get oriented
+    t1 = 90                 # Ocean
+    t2 = 140                # Field and mac n cheese
+    t3 = 240                # Outer space
+    t4 = 250                # End
 
     # Initialize:
     pos, thetas, L = cat_dynamics.initialize(n, L**2 / n)

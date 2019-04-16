@@ -94,8 +94,8 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    tfade = 5
-    tfadeout = 15
+    tfade = 10
+    tfadeout = 180
 
     # Initialize:
     pos = np.array([[.1, .8],
