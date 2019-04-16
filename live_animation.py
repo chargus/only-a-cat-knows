@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 Use Matplotlib to generate live animation of cat dynamics.
 
@@ -8,29 +7,53 @@ Use Matplotlib to generate live animation of cat dynamics.
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import image as img
-from matplotlib.offsetbox import (TextArea, DrawingArea, OffsetImage,
-                                  AnnotationBbox, AnchoredOffsetbox)
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib import animation
 import cat_dynamics
 import time
-import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
-# np.random.seed(0)
 plt.rcParams['toolbar'] = 'None'
 
 
 def update(data):
     pos, thetas, cat_pos, cat_thetas = data
-
+    buff = 0.5  # Hysteresis buffer, to keep cat icons from jittering
     # Update cats:
     for i in range(len(abbox)):
         scaledpos = scalefactor * (1.4 * cat_pos[i] - 1.4)
         abbox[i].xybox = scaledpos
-        if np.sin(cat_thetas[i]) > 0:
-            abbox[i].offsetbox = ibf[i]  # Face forwards
-        else:
-            abbox[i].offsetbox = ibb[i]  # Face backwards
+        dircode = ''
+        if dircodes[i][0] == 'f':
+            if np.sin(cat_thetas[i]) > -buff:
+                dircode += 'f'  # Face forwards
+            else:
+                dircode += 'b'  # Face backwards
+        elif dircodes[i][0] == 'b':
+            if np.sin(cat_thetas[i]) < buff:
+                dircode += 'b'  # Face backwards
+            else:
+                dircode += 'f'  # Face forwards
+
+        if dircodes[i][1] == 'r':
+            if np.cos(cat_thetas[i]) > -buff:
+                dircode += 'r'  # Face right
+            else:
+                dircode += 'l'  # Face left
+        elif dircodes[i][1] == 'l':
+            if np.cos(cat_thetas[i]) < buff:
+                dircode += 'l'  # Face left
+            else:
+                dircode += 'r'  # Face right
+        dircodes[i] = dircode
+        # if np.sin(cat_thetas[i]) > 0:
+        #     dircode += 'f'  # Face forwards
+        # else:
+        #     dircode += 'b'  # Face backward
+        # if np.cos(cat_thetas[i]) > 0:
+        #     dircode += 'r'  # Face right
+        # else:
+        #     dircode += 'l'  # Face left
+        abbox[i].offsetbox = imcat[dircode][i]
+
     # Update labels:
     for i in range(ncat):
         shift = np.array([0, .1])
@@ -88,22 +111,22 @@ def data_gen():
 
 if __name__ == '__main__':
     # Define simulation parmeters and initialize dynamics:
-    names = """alois jason curtis sarah cory andrew na-young soo-yeon mitch
+    names = """na-young alois cory jason curtis sarah andrew soo-yeon mitch
             """.split()
     n = 20                  # Number of fish
     ncat = len(names)       # Number of cats
     L = 2.5                 # Box length
-    eta = 1.2               # Fish friction coefficient
-    cat_eta = 1.            # Cat friction coefficient
+    eta = 1.2               # Fish noise term
+    cat_eta = 1.            # Cat noise term
     vel = 0.1               # Fish velocity (overdamped, so constant)
     cat_vel = 0.02          # Cat velocity (overdamped, so constant)
-    cat_pull = .2         # Attraction of fish to cats
+    cat_pull = .2           # Attraction of fish to cats
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
     t0 = 1                  # Initial frozen frame to get oriented
-    t1 = 5                  # Ocean
-    t2 = 10                # Field and mac n cheese
+    t1 = 10                 # Ocean
+    t2 = 20                 # Field and mac n cheese
     t3 = 180                # Outer space
     t4 = 190                # End
 
@@ -112,6 +135,7 @@ if __name__ == '__main__':
     cat_pos = np.random.uniform(0, L, size=(ncat, 2))
     cat_thetas = np.random.uniform(-np.pi, np.pi, size=ncat)
     starttime = time.time()
+    dircodes = ['fl' for _ in range(ncat)]
 
     # Initialize matplotlib figure
     fig, ax = plt.subplots(facecolor='black', figsize=(8, 8))
@@ -122,12 +146,13 @@ if __name__ == '__main__':
     im = ax.imshow(bg1, alpha=1.0, zorder=0)
 
     # Add cats:
-    ibb = [OffsetImage(img.imread('icons/{}b.png'.format(i)), zoom=1.3) for
-           i in range(ncat)]
-    ibf = [OffsetImage(img.imread('icons/{}f.png'.format(i)), zoom=1.3) for
-           i in range(ncat)]
+    imcat = {}
+    for l in ['fr', 'br', 'fl', 'bl']:
+        imcat[l] = [OffsetImage(
+            img.imread('icons/cats/{}{}.png'.format(i, l)), zoom=1.3)
+            for i in range(ncat)]
     abbox = [AnnotationBbox(ib, [0, 0], xycoords='data', frameon=False) for
-             ib in ibb]
+             ib in imcat['fr']]
     for ab in abbox:
         ax.add_artist(ab)
 
@@ -171,6 +196,5 @@ if __name__ == '__main__':
         fig, update, data_gen, blit=False, interval=50)
     figManager = plt.get_current_fig_manager()
     figManager.window.showMaximized()
-    # plt.tight_layout()
     ax.axis('off')  # Turn off ugly border
     plt.show()
