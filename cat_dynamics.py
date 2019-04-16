@@ -226,7 +226,7 @@ def timestep_underdamped(pos, vel, gamma, T, rcut, L, dt,
 
 def piano_trio_bc(pos, vel, L):
     lb = 0.17 * L  # Lower bound
-    ub = L  # Upper bound
+    ub = .95 * L  # Upper bound
     # Left
     mask = pos[:, 0] < lb
     pos[:, 0][mask] = lb                 # move in-bounds
