@@ -114,9 +114,9 @@ def data_gen_random():
 
 def data_gen():
     while True:
-        if time.time() - starttime > 180:
-            cat_pos[:] = .5
-            pos[:] = .5
+        if time.time() - starttime > t3:
+            cat_pos[:] = 100
+            pos[:] = 100
         elif time.time() - starttime > t0:
             pos[:], thetas[:] = cat_dynamics.timestep(
                 pos, thetas, rcut, eta, vel, L, mod, cat_pos, cat_pull)
@@ -141,10 +141,15 @@ if __name__ == '__main__':
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
     t0 = 10                 # Initial frozen frame to get oriented
-    t1 = 90                 # Ocean
-    t2 = 140                # Field and mac n cheese
-    t3 = 240                # Outer space
-    t4 = 250                # End
+    t1 = 100                # Ocean
+    t2 = 160                # Field and mac n cheese
+    t3 = 290                # Outer space
+    t4 = 300                # End
+    # t0 = 1                 # Initial frozen frame to get oriented
+    # t1 = 5                # Ocean
+    # t2 = 10                # Field and mac n cheese
+    # t3 = 15                # Outer space
+    # t4 = 25                # End
 
     # Initialize:
     pos, thetas, L = cat_dynamics.initialize(n, L**2 / n)
@@ -184,7 +189,7 @@ if __name__ == '__main__':
         labels.append(ax.text(0, 0, names[i], props))
     clock = ax.text(.9, .9, '', props, zorder=100,  # Countdown clock
                     transform=ax.transAxes,
-                    color='m', fontsize=40, family='heavy',
+                    color='m', fontsize=40,
                     bbox={'facecolor': 'white', 'pad': 5, 'alpha': .8})
 
     # Add fish:
