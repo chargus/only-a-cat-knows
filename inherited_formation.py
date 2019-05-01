@@ -103,8 +103,10 @@ def update(data):
         im.set_data(bg3)
 
     if currtime > t3:
-        im.set_data(bg4)
-        im.set_zorder(101)
+        # im.set_data(bg4)
+        # im.set_zorder(101)
+        alpha = min(1., (t4 - currtime) / (t4 - t3))
+        imfade.set_alpha(alpha)
 
     if currtime > t4:
         exit()
@@ -144,21 +146,21 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    t0 = 12                 # Initial frozen frame to get oriented
-    t1 = 130                # Ocean
-    t2 = 220                # Field and mac n cheese
-    t3 = 380                # Outer space
-    t4 = 400                # End
-    t0 = 6                 # Initial frozen frame to get oriented
-    t1 = 10                # Ocean
-    t2 = 20                # Field and mac n cheese
-    t3 = 30                # Outer space
-    t4 = 40                # End
-    # t0 = 1                 # Initial frozen frame to get oriented
-    # t1 = 2                # Ocean
-    # t2 = 3                # Field and mac n cheese
-    # t3 = 20                # Outer space
+    # t0 = 12                 # Initial frozen frame to get oriented
+    # t1 = 130                # Ocean
+    # t2 = 220                # Field and mac n cheese
+    # t3 = 380                # Outer space
+    # t4 = 400                # End
+    # t0 = 6                 # Initial frozen frame to get oriented
+    # t1 = 10                # Ocean
+    # t2 = 20                # Field and mac n cheese
+    # t3 = 30                # Outer space
     # t4 = 40                # End
+    t0 = 1                 # Initial frozen frame to get oriented
+    t1 = 2                # Ocean
+    t2 = 3                # Field and mac n cheese
+    t3 = 20                # Outer space
+    t4 = 40                # End
 
     # Initialize:
     pos, thetas, L = cat_dynamics.initialize(n, L**2 / n)
@@ -173,6 +175,9 @@ if __name__ == '__main__':
     bg2 = img.imread('f/bg2.png')
     bg3 = img.imread('f/bgspace.jpg')
     bg4 = img.imread('f/endpage.png')
+    black = np.zeros_like(bg3)
+    imfade = ax.imshow(black, alpha=1.0, zorder=102)
+
     bgid = [0]
     im = ax.imshow(bg1[0], alpha=1.0, zorder=0)
 
