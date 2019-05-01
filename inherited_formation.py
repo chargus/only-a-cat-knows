@@ -64,7 +64,7 @@ def update(data):
 
     # Update countdown clock
     show_clock = False
-    for t in [t0, t1, t2, t3]:
+    for t in [t0, t1, t2, t3, t4]:
         countdown = t - currtime
         if (countdown > 0) and (countdown < 7):
             show_clock = True
@@ -132,24 +132,29 @@ if __name__ == '__main__':
     n = 20                  # Number of fish
     ncat = len(names)       # Number of cats
     L = 2.5                 # Box length
-    eta = 1.2               # Fish noise term
-    cat_eta = 1.            # Cat noise term
-    vel = 0.1               # Fish velocity (overdamped, so constant)
-    cat_vel = 0.02          # Cat velocity (overdamped, so constant)
+    eta = 1.5               # Fish noise term
+    cat_eta = 0.93          # Cat noise term
+    vel = 0.07               # Fish velocity (overdamped, so constant)
+    cat_vel = 0.015          # Cat velocity (overdamped, so constant)
     cat_pull = .2           # Attraction of fish to cats
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    t0 = 10                 # Initial frozen frame to get oriented
-    t1 = 100                # Ocean
-    t2 = 160                # Field and mac n cheese
-    t3 = 290                # Outer space
-    t4 = 300                # End
+    t0 = 12                 # Initial frozen frame to get oriented
+    t1 = 130                # Ocean
+    t2 = 220                # Field and mac n cheese
+    t3 = 380                # Outer space
+    t4 = 400                # End
+    # t0 = 6                 # Initial frozen frame to get oriented
+    # t1 = 10                # Ocean
+    # t2 = 20                # Field and mac n cheese
+    # t3 = 30                # Outer space
+    # t4 = 40                # End
     # t0 = 1                 # Initial frozen frame to get oriented
-    # t1 = 5                # Ocean
-    # t2 = 10                # Field and mac n cheese
-    # t3 = 15                # Outer space
-    # t4 = 25                # End
+    # t1 = 2                # Ocean
+    # t2 = 3                # Field and mac n cheese
+    # t3 = 20                # Outer space
+    # t4 = 40                # End
 
     # Initialize:
     pos, thetas, L = cat_dynamics.initialize(n, L**2 / n)
@@ -171,7 +176,7 @@ if __name__ == '__main__':
     imcat = {}
     for l in ['fr', 'br', 'fl', 'bl']:
         imcat[l] = [OffsetImage(
-            img.imread('icons/cats/{}{}.png'.format(i, l)), zoom=1.3)
+            img.imread('icons/cats/{}{}.png'.format(i, l)), zoom=0.95)
             for i in range(ncat)]
     abbox = [AnnotationBbox(ib, [0, 0], xycoords='data', frameon=False) for
              ib in imcat['fr']]
@@ -194,18 +199,18 @@ if __name__ == '__main__':
 
     # Add fish:
     angles = range(0, 360, 30)
-    ima = [OffsetImage(img.imread('icons/fish/a{}.png'.format(a)), zoom=1.3)
+    ima = [OffsetImage(img.imread('icons/fish/a{}.png'.format(a)), zoom=.9)
            for a in angles]
-    imb = [OffsetImage(img.imread('icons/fish/b{}.png'.format(a)), zoom=1.3)
+    imb = [OffsetImage(img.imread('icons/fish/b{}.png'.format(a)), zoom=.9)
            for a in angles]
-    imc = [OffsetImage(img.imread('icons/fish/c{}.png'.format(a)), zoom=1.3)
+    imc = [OffsetImage(img.imread('icons/fish/c{}.png'.format(a)), zoom=.9)
            for a in angles]
     imcheese = [OffsetImage(img.imread('icons/cheese/cheese{}.png'.format(a)),
-                            zoom=1.) for a in angles]
+                            zoom=.9) for a in angles]
     imstar = [OffsetImage(img.imread('icons/space/star{}.png'.format(a)),
-                          zoom=.8) for a in angles]
+                          zoom=.6) for a in angles]
     imcomet = [OffsetImage(img.imread('icons/space/comet{}.png'.format(a)),
-                           zoom=1.) for a in angles]
+                           zoom=.8) for a in angles]
 
     fishcolors = [ima, imb, imc]
     fishcolorids = np.random.randint(3, size=n)

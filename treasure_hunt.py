@@ -86,7 +86,7 @@ if __name__ == '__main__':
     ncat = len(names)       # Number of cats
     L = 1.                  # Box length
     m = np.array([1., 1., 1., 100.])
-    vel_fix = .05
+    vel_fix = .04
     sigma = .1
     epsilon = .01
     dt = .01
@@ -121,10 +121,10 @@ if __name__ == '__main__':
     # Add boat:
     imboatr = [OffsetImage(img.imread(
         'icons/boat/right/boat_00{:03d}.png'.format(i)),
-        zoom=1.3) for i in range(1, 101)]
+        zoom=1.) for i in range(1, 101)]
     imboatl = [OffsetImage(img.imread(
         'icons/boat/left/boat_00{:03d}.png'.format(i)),
-        zoom=1.3) for i in range(1, 101)]
+        zoom=1.) for i in range(1, 101)]
     boatbox = AnnotationBbox(imboatr[0], [0, 0],
                              xycoords='data', frameon=False)
     ax.add_artist(boatbox)
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     imcat = {}
     for l in ['fr', 'br', 'fl', 'bl']:
         imcat[l] = [OffsetImage(
-            img.imread('icons/cats/{}{}.png'.format(i, l)), zoom=1.3)
+            img.imread('icons/cats/{}{}.png'.format(i, l)), zoom=1.)
             for i in range(ncat)]
     abbox = [AnnotationBbox(ib, [0, 0], xycoords='data', frameon=False) for
              ib in imcat['fr']]
