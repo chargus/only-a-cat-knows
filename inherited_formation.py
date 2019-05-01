@@ -64,13 +64,17 @@ def update(data):
 
     # Update countdown clock
     show_clock = False
-    for t in [t0, t1, t2, t3, t4]:
+    for t in [t1, t2, t3, t4]:
         countdown = t - currtime
         if (countdown > 0) and (countdown < 7):
             show_clock = True
-            clock.set_text('{:.2f}'.format(countdown))
+            # clock.set_text('{:.2f}'.format(countdown))
+            for label in labels:
+                label.set_color('#FF1493')
     if not show_clock:
-        clock.set_text('')
+        # clock.set_text('')
+        for label in labels:
+            label.set_color('k')
 
     # Update fish:
     for i in range(n):
@@ -145,11 +149,11 @@ if __name__ == '__main__':
     t2 = 220                # Field and mac n cheese
     t3 = 380                # Outer space
     t4 = 400                # End
-    # t0 = 6                 # Initial frozen frame to get oriented
-    # t1 = 10                # Ocean
-    # t2 = 20                # Field and mac n cheese
-    # t3 = 30                # Outer space
-    # t4 = 40                # End
+    t0 = 6                 # Initial frozen frame to get oriented
+    t1 = 10                # Ocean
+    t2 = 20                # Field and mac n cheese
+    t3 = 30                # Outer space
+    t4 = 40                # End
     # t0 = 1                 # Initial frozen frame to get oriented
     # t1 = 2                # Ocean
     # t2 = 3                # Field and mac n cheese
