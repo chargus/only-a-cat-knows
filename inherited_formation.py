@@ -46,14 +46,6 @@ def update(data):
             else:
                 dircode += 'r'  # Face right
         dircodes[i] = dircode
-        # if np.sin(cat_thetas[i]) > 0:
-        #     dircode += 'f'  # Face forwards
-        # else:
-        #     dircode += 'b'  # Face backward
-        # if np.cos(cat_thetas[i]) > 0:
-        #     dircode += 'r'  # Face right
-        # else:
-        #     dircode += 'l'  # Face left
         abbox[i].offsetbox = imcat[dircode][i]
 
     # Update labels:
@@ -70,7 +62,7 @@ def update(data):
             show_clock = True
             # clock.set_text('{:.2f}'.format(countdown))
             for label in labels:
-                label.set_color('#FF1493')
+                label.set_color('#FF1493')  # Pink labels
     if not show_clock:
         # clock.set_text('')
         for label in labels:
@@ -85,11 +77,14 @@ def update(data):
             fishbox[i].offsetbox = fishcolors[fishcolorids[i]][angleid]
         elif currtime <= t2:
             fishbox[i].offsetbox = imcheese[angleid]
-        else:
+        elif currtime <= t3:
             if i in range(3):
                 fishbox[i].offsetbox = imcomet[angleid]
             else:
                 fishbox[i].offsetbox = imstar[angleid]
+        else:
+            fishbox[i].offsetbox = imflame
+
 
     # Update background
     if currtime < t1:
@@ -103,13 +98,17 @@ def update(data):
         im.set_data(bg3)
 
     if currtime > t3:
-        # im.set_data(bg4)
-        # im.set_zorder(101)
-        alpha = min(1., (t4 - currtime) / (t4 - t3))
-        imfade.set_alpha(alpha)
+        bgid[0] = (bgid[0] + 1) % 4
+        im.set_data(bg4[bgid[0]])
 
     if currtime > t4:
-        exit()
+        im.set_data(bgblack)
+        im.set_zorder(101)
+
+    if currtime > t5:
+        im.set_data(bg5)
+        im.set_zorder(101)
+
     return abbox,
 
 
@@ -120,10 +119,10 @@ def data_gen_random():
 
 def data_gen():
     while True:
-        if time.time() - starttime > t3:
+        if time.time() - starttime > t4:
             cat_pos[:] = 100
             pos[:] = 100
-        elif time.time() - starttime > t0:
+        if time.time() - starttime > t0:
             pos[:], thetas[:] = cat_dynamics.timestep(
                 pos, thetas, rcut, eta, vel, L, mod, cat_pos, cat_pull)
             cat_pos[:], cat_thetas[:] = cat_dynamics.timestep(
@@ -133,12 +132,12 @@ def data_gen():
 
 if __name__ == '__main__':
     # Define simulation parmeters and initialize dynamics:
-    names = """na-young alois cory jason curtis sarah andrew soo-yeon mitch
+    names = """na-young alois jason curtis sarah andrew soo-yeon mitch
             """.split()
     n = 20                  # Number of fish
     ncat = len(names)       # Number of cats
     L = 2.5                 # Box length
-    eta = 1.5               # Fish noise term
+    eta = 2.0               # Fish noise term
     cat_eta = 0.93          # Cat noise term
     vel = 0.07               # Fish velocity (overdamped, so constant)
     cat_vel = 0.015          # Cat velocity (overdamped, so constant)
@@ -146,21 +145,18 @@ if __name__ == '__main__':
     rcscale = .2            # Scale factor determining rcut
     mod = False             # Unused mod from Kranthi class
     rcut = rcscale * L      # Cutoff radius
-    # t0 = 12                 # Initial frozen frame to get oriented
-    # t1 = 130                # Ocean
-    # t2 = 220                # Field and mac n cheese
-    # t3 = 380                # Outer space
-    # t4 = 400                # End
-    # t0 = 6                 # Initial frozen frame to get oriented
-    # t1 = 10                # Ocean
-    # t2 = 20                # Field and mac n cheese
-    # t3 = 30                # Outer space
-    # t4 = 40                # End
-    t0 = 1                 # Initial frozen frame to get oriented
-    t1 = 2                # Ocean
-    t2 = 3                # Field and mac n cheese
-    t3 = 20                # Outer space
-    t4 = 40                # End
+    t0 = 12                 # Initial frozen frame to get oriented
+    t1 = 130                # Ocean
+    t2 = 220                # Field and mac n cheese
+    t3 = 375                # Outer space
+    t4 = 395                # Volcano
+    t5 = 400                # Cut, then end frame
+    # t0 = 1                 # Initial frozen frame to get oriented
+    # t1 = 2                # Ocean
+    # t2 = 3                # Field and mac n cheese
+    # t3 = 4                # Outer space
+    # t4 = 5                # Volcano
+    # t5 = 6                # Cut, then end frame
 
     # Initialize:
     pos, thetas, L = cat_dynamics.initialize(n, L**2 / n)
@@ -174,9 +170,9 @@ if __name__ == '__main__':
     bg1 = [img.imread('f/bg_underwater/{}.png'.format(i)) for i in range(4)]
     bg2 = img.imread('f/bg2.png')
     bg3 = img.imread('f/bgspace.jpg')
-    bg4 = img.imread('f/endpage.png')
-    black = np.zeros_like(bg3)
-    imfade = ax.imshow(black, alpha=1.0, zorder=102)
+    bg4 = [img.imread('f/bg_lava/{}.png'.format(i)) for i in range(4)]
+    bg5 = img.imread('f/endpage.png')
+    bgblack = img.imread('f/bg_black.png')
 
     bgid = [0]
     im = ax.imshow(bg1[0], alpha=1.0, zorder=0)
@@ -220,7 +216,7 @@ if __name__ == '__main__':
                           zoom=.6) for a in angles]
     imcomet = [OffsetImage(img.imread('icons/space/comet{}.png'.format(a)),
                            zoom=.8) for a in angles]
-
+    imflame = OffsetImage(img.imread('icons/flames/flame.png'), zoom=.4)
     fishcolors = [ima, imb, imc]
     fishcolorids = np.random.randint(3, size=n)
     fishbox = [AnnotationBbox(ima[0], [0, 0], xycoords='data',
