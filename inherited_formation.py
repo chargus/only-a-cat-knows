@@ -132,7 +132,7 @@ def data_gen():
 
 if __name__ == '__main__':
     # Define simulation parmeters and initialize dynamics:
-    names = """na-young alois jason curtis sarah andrew soo-yeon mitch
+    names = """na-young alois mitch jason curtis sarah andrew soo-yeon
             """.split()
     n = 20                  # Number of fish
     ncat = len(names)       # Number of cats
