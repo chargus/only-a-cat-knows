@@ -1,4 +1,5 @@
 # only-a-cat-knows
+![That's right. Cats in space.](f/only-a-cat-still.png)
 Only a cat knows why it turns. What draws it, almost instinctively, to shift
 its attention. How many generations of psychic meaning, biological carving of
 inherited formation, have offered us this one ineluctable form of expression?
@@ -22,6 +23,7 @@ A matplotlib window will open displaying the video animation. `cat_dynamics.py`
 is a library of supporting functions used in the scripts.
 
 ## inherited_formation.py
+![Cats in the ocean, too.](f/only-a-cat-still2.png)
 This is a piece for ~10 performers, based on the Vicsek model
 ([Vicsek, Tamás et al. 1995. Physical Review Letters. 75 (6): 1226–1229)](https://doi.org/10.1103%2FPhysRevLett.75.1226)
 ### Rules:
@@ -31,6 +33,7 @@ This is a piece for ~10 performers, based on the Vicsek model
   * The piece moves through three worlds; each should sound distinct.
 
 ## treasure_hunt.py
+![A trio of cats sets off on a nautical adventure.](f/only-a-cat-still3.png)
 This is a piece for three performers on a single instrument. Interactions are 
 Newtonian, mediated through 12th-order polymolial repulsion.
 ### Rules:
